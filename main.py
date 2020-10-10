@@ -60,9 +60,11 @@ def main():
             rawdata = req.text
         except:
             continue
-        
+        j = 0
+        resultFinalSent = ''
+
         try:
-            for i in range(1,10):
+            for i in range(1,20):
                 data = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')
                 incident = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')[i].split('"')[0]
                 dataFinal = data[i].split('<td>')
@@ -73,13 +75,19 @@ def main():
                         resultFinal = resultFinal + ' ' + result
                 logCheckID = [logCheck[i].split('\n')[0] for i in range(0, len(logCheck))]
                 if str(incident) not in logCheckID:
-                    print('[#] New update is found!')
+                    j+=1
+                    #print('[#] New update is found!')
                     dosya.write(incident + '\n')
-                    emailSent(resultFinal)
+                    resultFinalSent = resultFinalSent + '\n' + resultFinal
+            if resultFinalSent != '':
+                print('New updates are ...')
+                print(resultFinalSent)
+                emailSent(resultFinalSent)
 
-            time.sleep(300)
             dosya.close()
-            
-
+        except Exception as e:
+            print(f'[#] There is a problem in texas website, error is {e}')
+        print('[#] Sleeping 5 min..')
+        time.sleep(300)
 if __name__ == '__main__':
     main()
