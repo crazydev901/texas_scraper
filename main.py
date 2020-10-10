@@ -55,26 +55,31 @@ def main():
             "_fuseaction=main.searchresults.x": "20",
             "_fuseaction=main.searchresults.y": "17",
         }
-        req = requests.post(url, data=postData, headers=headers)
-        rawdata = req.text
+        try:
+            req = requests.post(url, data=postData, headers=headers)
+            rawdata = req.text
+        except:
+            continue
+        
+        try:
+            for i in range(1,10):
+                data = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')
+                incident = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')[i].split('"')[0]
+                dataFinal = data[i].split('<td>')
+                resultFinal = incident
+                for dataFinal2 in dataFinal:
+                    result = dataFinal2.split("</td>")[0].strip()
+                    if 'href=' not in result and '</a>' not in result:
+                        resultFinal = resultFinal + ' ' + result
+                logCheckID = [logCheck[i].split('\n')[0] for i in range(0, len(logCheck))]
+                if str(incident) not in logCheckID:
+                    print('[#] New update is found!')
+                    dosya.write(incident + '\n')
+                    emailSent(resultFinal)
 
-        for i in range(1,10):
-            data = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')
-            incident = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')[i].split('"')[0]
-            dataFinal = data[i].split('<td>')
-            resultFinal = incident
-            for dataFinal2 in dataFinal:
-                result = dataFinal2.split("</td>")[0].strip()
-                if 'href=' not in result and '</a>' not in result:
-                    resultFinal = resultFinal + ' ' + result
-            logCheckID = [logCheck[i].split('\n')[0] for i in range(0, len(logCheck))]
-            if str(incident) not in logCheckID:
-                print('[#] New update is found!')
-                dosya.write(incident + '\n')
-                emailSent(resultFinal)
-
-        time.sleep(300)
-        dosya.close()
+            time.sleep(300)
+            dosya.close()
+            
 
 if __name__ == '__main__':
     main()
