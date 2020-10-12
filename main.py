@@ -68,7 +68,8 @@ def main():
                 data = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')
                 incident = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')[i].split('"')[0]
                 dataFinal = data[i].split('<td>')
-                resultFinal = incident
+                link = f'https://www2.tceq.texas.gov/oce/eer/index.cfm?fuseaction=main.getDetails&target={incident}'
+                resultFinal = incident + ' ' + link
                 for dataFinal2 in dataFinal:
                     result = dataFinal2.split("</td>")[0].strip()
                     if 'href=' not in result and '</a>' not in result:
