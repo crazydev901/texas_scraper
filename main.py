@@ -2,11 +2,19 @@ import requests
 import smtplib
 import time
 
+
+from_email  = 'texas_scraper@outlook.com'
+to_email    = 'vyadha@skylarcap.com'
+password    = 'asdf234%^AFE'
+host        = 'smtp.live.com'
+port        = 587
+
+
 def emailSent(messageTexas):
 
     preMessage = 'Incident  RN	RE Name	Began	Ended	Event Type	Report Type	Report Date	Associated Customer'
 
-    server = smtplib.SMTP('smtp.live.com', 587)
+    server = smtplib.SMTP(host, port)
 
     SUBJECT = "Texas Air Emission Event Report!"
     TEXT = preMessage + '\n' + messageTexas
@@ -17,8 +25,8 @@ def emailSent(messageTexas):
         server.ehlo()
         server.starttls()
         server.ehlo()
-        server.login('texas_scraper@outlook.com', 'asdf234%^AFE')
-        server.sendmail("texas_scraper@outlook.com", "texas_scraper@outlook.com", message)
+        server.login(from_email, password)
+        server.sendmail(from_email, to_email, message)
         server.quit()
         print('[#] Email is sent!')
     except:
@@ -28,7 +36,7 @@ def emailSent(messageTexas):
 def main():
     print('[#] Texas scraper has been started!')
     while(True):
-        dosya =  open('rawData.txt', 'a+')
+        dosya =  open('rawData.txt', 'r+')
         logCheck = open('rawData.txt', 'r').readlines()
 
         url = 'https://www2.tceq.texas.gov/oce/eer/index.cfm'
@@ -64,6 +72,7 @@ def main():
         resultFinalSent = ''
 
         try:
+            incidents = []
             for i in range(1,20):
                 data = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')
                 incident = rawdata.split('index.cfm?fuseaction=main.getDetails&amp;target=')[i].split('"')[0]
@@ -78,13 +87,16 @@ def main():
                 if str(incident) not in logCheckID:
                     j+=1
                     #print('[#] New update is found!')
-                    dosya.write(incident + '\n')
+                    incidents.append(incident)
                     resultFinalSent = resultFinalSent + '\n' + resultFinal
+            if len(incidents) > 0 :
+                content = dosya.read()
+                dosya.seek(0, 0)
+                dosya.write(''.join(incident+'\n' for incident in incidents) + content)
             if resultFinalSent != '':
                 print('New updates are ...')
                 print(resultFinalSent)
                 emailSent(resultFinalSent)
-
             dosya.close()
         except Exception as e:
             print(f'[#] There is a problem in texas website, error is {e}')
